@@ -57,10 +57,11 @@ export function UploadAssetButton({
       />
       <Button
         onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
+        disabled
+        title="Media uploads are disabled in this deployment"
       >
         <UploadIcon />
-        {uploading ? "Uploading…" : "Upload"}
+        {"Media disabled"}
       </Button>
     </>
   )

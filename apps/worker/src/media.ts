@@ -75,7 +75,7 @@ export async function downloadAndStoreMedia(
   msg: any,
   type: IncomingType,
 ): Promise<{ mediaKey: string; mediaMime: string; mediaMeta: MediaMeta } | null> {
-  if (type === "text") return null;
+  if (type === "text" || !env.MEDIA) return null;
   const content = msg?.message;
   if (!content) return null;
 
@@ -126,6 +126,7 @@ export async function storeOutgoingMedia(
   type: Exclude<IncomingType, "text">,
   fileName?: string,
 ): Promise<{ mediaKey: string; mediaMime: string; mediaMeta: MediaMeta }> {
+  if (!env.MEDIA) throw new Error("Media storage is disabled in this deployment.");
   const ext = extFor(mime, type);
   const mediaKey = `${workspaceId}/${waSessionId}/${waMessageId}.${ext}`;
   await env.MEDIA.put(mediaKey, buffer, { httpMetadata: { contentType: mime } });
@@ -162,6 +163,7 @@ export async function storeLibraryMedia(
   buffer: ArrayBuffer,
   mime: string,
 ): Promise<{ mediaKey: string; mediaMime: string; mediaType: "image" | "video" | "audio" | "document" }> {
+  if (!env.MEDIA) throw new Error("Media storage is disabled in this deployment.");
   const type = mediaTypeFromMime(mime);
   const ext = extFor(mime, type);
   const mediaKey = `${workspaceId}/templates/${crypto.randomUUID()}.${ext}`;

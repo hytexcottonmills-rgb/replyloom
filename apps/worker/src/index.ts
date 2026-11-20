@@ -62,14 +62,14 @@ export interface Env {
   WHATSAPP_SESSION: DurableObjectNamespace;
   SCHEDULER: DurableObjectNamespace;
   DB: D1Database;
-  MEDIA: R2Bucket;
+  MEDIA?: R2Bucket;
   BROADCAST_QUEUE: Queue<BroadcastQueueMessage>;
   AI: Ai;
   VECTORIZE: VectorizeIndex;
   AGENT_VECTORIZE: VectorizeIndex;
   REPLY_CACHE: KVNamespace;
-  API_RATE_LIMITER: RateLimit;
-  AUTH_RATE_LIMITER: RateLimit;
+  API_RATE_LIMITER?: RateLimit;
+  AUTH_RATE_LIMITER?: RateLimit;
   /**
    * Shared secret that proves a request came from apps/web (which holds the
    * same value as its ENGINE_INTERNAL_SECRET var and presents it on every
@@ -324,6 +324,7 @@ async function route(request: Request, env: Env): Promise<Response> {
     if (!key) return new Response("Not found", { status: 404 });
     if (key.startsWith("config/") || key.startsWith("backups/") || key.includes("..")) return forbidden();
     if (!key.startsWith(`${caller.workspaceId}/`)) return forbidden();
+    if (!env.MEDIA) return Response.json({ ok: false, error: "Media storage is disabled in this deployment." }, { status: 503 });
     const object = await env.MEDIA.get(key);
     if (!object) return new Response("Not found", { status: 404 });
     const headers = new Headers();
@@ -343,6 +344,7 @@ async function route(request: Request, env: Env): Promise<Response> {
     if (!key) return Response.json({ ok: false, error: "Missing key" }, { status: 400 });
     if (key.startsWith("config/") || key.startsWith("backups/") || key.includes("..")) return forbidden();
     if (!key.startsWith(`${caller.workspaceId}/`)) return forbidden();
+    if (!env.MEDIA) return Response.json({ ok: false, error: "Media storage is disabled in this deployment." }, { status: 503 });
     await env.MEDIA.delete(key);
     return Response.json({ ok: true });
   }
@@ -351,6 +353,7 @@ async function route(request: Request, env: Env): Promise<Response> {
   // library (not tied to any one message/session). multipart, same
   // reasoning as /session/:id/send-media. ──
   if (request.method === "POST" && url.pathname === "/media/upload") {
+    if (!env.MEDIA) return Response.json({ ok: false, error: "Media uploads are disabled in this deployment." }, { status: 503 });
     let form: FormData;
     try {
       form = await request.formData();
@@ -710,7 +713,7 @@ const worker = {
       url.pathname.includes("/signup");
 
     const rateLimiter = isAuthEndpoint ? env.AUTH_RATE_LIMITER : env.API_RATE_LIMITER;
-    const { success } = await rateLimiter.limit({ key: clientIp });
+    const { success } = rateLimiter ? await rateLimiter.limit({ key: clientIp }) : { success: true };
 
     if (!success) {
       return new Response(

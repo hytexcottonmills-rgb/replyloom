@@ -1032,6 +1032,7 @@ export class WhatsAppSession implements DurableObject {
     // messages.upsert echo (which WhatsApp doesn't even reliably send back
     // for our own outgoing messages).
     if (request.method === "POST" && url.pathname === "/send-media") {
+      if (!this.env.MEDIA) return Response.json({ ok: false, error: "Media sending is disabled in this deployment. Text messages are available." }, { status: 503 });
       await this.ensureInit();
       if (!this.socket) {
         return Response.json(
@@ -1191,6 +1192,7 @@ export class WhatsAppSession implements DurableObject {
         let content: any;
 
         if (body.mediaKey) {
+          if (!this.env.MEDIA) return Response.json({ ok: false, error: "Template attachments are disabled in this deployment." }, { status: 503 });
           const object = await this.env.MEDIA.get(body.mediaKey);
           if (!object) {
             return Response.json({ ok: false, error: "Template media not found in storage" }, { status: 404 });
