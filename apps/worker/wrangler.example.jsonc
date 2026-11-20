@@ -49,7 +49,7 @@
   // production. This does mean local dev reads/writes your actual D1
   // database, not an isolated local copy.
   "d1_databases": [
-    { "binding": "DB", "database_name": "whatsapp-ai", "database_id": "REPLACE_WITH_D1_DATABASE_ID", "migrations_dir": "../../packages/db/migrations", "remote": true }
+    { "binding": "DB", "database_name": "replyloom-crm", "database_id": "REPLACE_WITH_D1_DATABASE_ID", "migrations_dir": "../../packages/db/migrations", "remote": true }
   ],
   // Anti-ban broadcast dispatch: each recipient is enqueued once with a
   // staggered delaySeconds (see src/broadcast.ts) instead of blasting the
