@@ -610,6 +610,7 @@ export async function proxyWorkspaceMedia(request: Request): Promise<Response> {
     return new Response("Forbidden", { status: 403 })
   }
 
+  if (!env.MEDIA) return new Response("Media storage is disabled in this deployment.", { status: 503 })
   const etag = request.headers.get("If-None-Match")
   const object = await env.MEDIA.get(key, etag ? { onlyIf: { etagDoesNotMatch: etag.replace(/"/g, "") } } : undefined)
   if (!object) {
