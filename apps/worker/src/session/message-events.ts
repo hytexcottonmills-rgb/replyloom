@@ -88,7 +88,7 @@ export async function processLiveMessage(
   // inline like WhatsApp Web does instead of a bare "[image]"
   // placeholder. Best-effort: a failure here still lets the message
   // through, just without media attached.
-  if (MEDIA_TYPES.includes(parsed.type) && ctx.socket) {
+  if (MEDIA_TYPES.includes(parsed.type) && ctx.socket && ctx.env.MEDIA) {
     const media = await downloadAndStoreMedia(
       ctx.socket,
       ctx.env,
