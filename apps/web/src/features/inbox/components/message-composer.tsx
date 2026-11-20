@@ -341,10 +341,10 @@ export function MessageComposer({
               variant="ghost"
               size="icon"
               className="mb-0.5 shrink-0 text-muted-foreground"
-              disabled={!onSendMedia && !onSendMediaKey}
+              disabled
               aria-label="Attach a file"
-              title="Attach a file"
-              onClick={() => setMediaDialogOpen(true)}
+              title="Attachments are disabled in this no-R2 deployment"
+
             >
               <PaperclipIcon />
             </Button>
